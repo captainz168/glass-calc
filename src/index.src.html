@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>คำนวณกระจก ASTM E1300</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F7F9F9; --panel:#FFFFFF; --ink:#1E272B; --muted:#5E6B70; --line:#D5DDDF;
+  --glass:#2F7D78; --glass-tint:#DCEFEC; --frame:#7E8A90; --pass:#1D5FB8; --fail:#B8322A; --warn:#9A6400; --on-accent:#FFFFFF;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#141A1C; --panel:#1C2427; --ink:#E6ECEE; --muted:#9AA7AC; --line:#2F3A3E;
+    --glass:#5FB8B0; --glass-tint:#1F3836; --frame:#8E9AA0; --pass:#6FA3EC; --fail:#EE7A70; --warn:#E3B04B; --on-accent:#0E1A19;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141A1C; --panel:#1C2427; --ink:#E6ECEE; --muted:#9AA7AC; --line:#2F3A3E;
+  --glass:#5FB8B0; --glass-tint:#1F3836; --frame:#8E9AA0; --pass:#6FA3EC; --fail:#EE7A70; --warn:#E3B04B; --on-accent:#0E1A19;
+}
+*{box-sizing:border-box}
+html{font-size:15px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans Thai",system-ui,sans-serif;line-height:1.5;font-variant-numeric:tabular-nums}
+header{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;padding:18px 24px 0;max-width:1240px;margin:0 auto}
+header h1{font-size:1.6rem;font-weight:700;margin:0;letter-spacing:-.01em}
+header h1 span{color:var(--glass)}
+header p{margin:0;color:var(--muted);font-size:.9rem;flex:1}
+.btn.lang{padding:4px 12px;font-size:.85rem}
+nav{max-width:1240px;margin:14px auto 0;padding:0 24px;display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+nav button{border:0;background:none;color:var(--muted);font:inherit;font-weight:500;padding:10px 14px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--glass)}
+main{max-width:1240px;margin:0 auto;padding:20px 24px 48px}
+.tab{display:none}.tab.on{display:block}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+fieldset{border:1px solid var(--line);border-radius:6px;background:var(--panel);margin:0 0 14px;padding:12px 14px 14px}
+legend{font-weight:600;padding:0 6px;font-size:.95rem}
+label.row{display:grid;grid-template-columns:1fr 120px 40px;align-items:center;gap:8px;margin:6px 0}
+label.row small{color:var(--muted)}
+input[type=number],input[type=text],select{width:100%;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink)}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--glass);outline-offset:2px}
+.hint{font-size:.82rem;color:var(--muted);margin:2px 0 0}
+.sup{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sup label{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:4px;padding:6px 8px;cursor:pointer;font-size:.88rem}
+.sup label:has(input:checked){border-color:var(--glass);background:var(--glass-tint)}
+.sup label.full{grid-column:1/-1}
+.sup svg{flex:none}
+.radios label,.checks label{display:flex;gap:8px;align-items:center;margin:4px 0;cursor:pointer}
+.seg{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg label{flex:1;text-align:center;padding:6px 4px;cursor:pointer;font-size:.88rem;border-right:1px solid var(--line)}
+.seg label:last-child{border-right:0}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){background:var(--glass);color:var(--on-accent)}
+.seg label:has(input:focus-visible){outline:2px solid var(--glass);outline-offset:-2px}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px}
+.stage-top{display:grid;grid-template-columns:minmax(240px,1fr) minmax(280px,1.1fr);gap:20px;align-items:center}
+@media (max-width:700px){.stage-top{grid-template-columns:1fr}}
+#drawing,#ribDrawing{width:100%;height:auto;max-height:420px}
+.verdict{font-size:1.25rem;font-weight:700;margin:0 0 6px}
+.verdict.ok{color:var(--pass)}.verdict.ng{color:var(--fail)}
+.thk{font-size:2.4rem;font-weight:700;line-height:1.1;color:var(--glass);margin:0}
+.thk small{font-size:1rem;color:var(--muted);font-weight:500}
+dl.res{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:12px 0 0}
+dl.res dt{color:var(--muted)}dl.res dd{margin:0;font-weight:500}
+.ok{color:var(--pass)}.ng{color:var(--fail)}.wn{color:var(--warn)}
+.msg{border-left:4px solid var(--fail);padding:8px 12px;background:color-mix(in srgb,var(--fail) 10%,transparent);margin:0 0 12px;border-radius:0 4px 4px 0}
+.msg.warn{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
+table{width:100%;border-collapse:collapse;margin-top:18px;font-size:.9rem}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:500}
+tr.pick td{background:var(--glass-tint);font-weight:600}
+.tbl-wrap{overflow-x:auto}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.btn{font:inherit;font-weight:500;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 14px;border-radius:4px;cursor:pointer}
+.btn.primary{background:var(--glass);border-color:var(--glass);color:var(--on-accent)}
+.note{font-size:.85rem;color:var(--muted)}
+.doc{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 20px;max-width:860px}
+.doc h3{margin:20px 0 6px;font-size:1.05rem}.doc h3:first-child{margin-top:0}
+.doc code{font-family:inherit;background:var(--glass-tint);padding:1px 6px;border-radius:3px}
+.refs li{margin:4px 0}
+.doc table{margin-top:8px}
+.cfg td input{max-width:150px;text-align:right}.cfg td select{max-width:200px}
+.cfg th{text-align:right}.cfg td.kg{color:var(--muted)}
+.cfg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:0 18px;max-width:1000px}
+.cfg-grid .wide{grid-column:span 1}
+#printSheet{display:none}
+@media print{
+  @page{size:A4;margin:14mm}
+  body{background:#fff;color:#000;font-size:10.5pt}
+  header,nav,main{display:none!important}
+  #printSheet{display:block}
+  #printSheet h2{font-size:15pt;margin:0 0 2px}
+  #printSheet h3{font-size:11.5pt;margin:12px 0 2px}
+  #printSheet table{font-size:9.5pt;margin-top:4px}
+  #printSheet td{text-align:left;border-bottom:1px solid #999;color:#000;padding:3px 6px}
+  #printSheet td:first-child{width:45%}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1><span data-i18n="h1">คำนวณกระจก <span>E1300</span></span></h1>
+  <p><span data-i18n="sub">ความต้านทานแรงลมของกระจกตาม ASTM E1300 (ลม 3 วินาที, Pb = 8/1000) และครีบกระจก</span></p>
+  <button type="button" class="btn lang" id="btnLang" aria-label="Language">EN</button>
+</header>
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-tab="calc"><span data-i18n="tabCalc">คำนวณกระจก</span></button>
+  <button role="tab" aria-selected="false" data-tab="rib"><span data-i18n="tabRib">Rib Glass</span></button>
+  <button role="tab" aria-selected="false" data-tab="cfg"><span data-i18n="tabCfg">ตั้งค่า</span></button>
+  <button role="tab" aria-selected="false" data-tab="help"><span data-i18n="tabHelp">วิธีคำนวณ</span></button>
+</nav>
+<main>
+<section class="tab on" id="tab-calc">
+ <div class="grid">
+  <form onsubmit="return false">
+   <fieldset>
+    <legend><span data-i18n="lgData">ข้อมูล</span></legend>
+    <label class="row"><span data-i18n="lWind">แรงลมออกแบบ, q</span> <input type="number" id="wl" step="0.01" min="0" value="1.5" list="wlList"><small>kPa</small></label>
+    <datalist id="wlList">
+      <option value="0.4905">50 kg/m²</option><option value="0.7848">80 kg/m²</option>
+      <option value="1.1772">120 kg/m²</option><option value="1.5696">160 kg/m²</option>
+    </datalist>
+    <p class="hint" id="wlKg"></p>
+    <label class="row"><span data-i18n="lA">ด้านสั้น, a</span> <input type="number" id="a" min="1" value="1000"><small>mm</small></label>
+    <label class="row"><span data-i18n="lB">ด้านยาว, b</span> <input type="number" id="b" min="1" value="2000"><small>mm</small></label>
+   </fieldset>
+   <fieldset>
+    <legend><span data-i18n="lgSup">การยึดกระจก</span></legend>
+    <div class="sup" id="supList"></div>
+   </fieldset>
+   <fieldset>
+    <legend><span data-i18n="lgGlass">ชนิดกระจก</span></legend>
+    <div class="seg" role="radiogroup" aria-label="ชนิดกระจก" data-i18n-aria="aGlass">
+      <label><input type="radio" name="gl" value="AN" checked>Annealed</label>
+      <label><input type="radio" name="gl" value="HS">Heat Str.</label>
+      <label><input type="radio" name="gl" value="FT">Tempered</label>
+    </div>
+    <div class="checks" style="margin-top:10px">
+      <label><input type="checkbox" id="lam"> Laminated (PVB 0.76 mm)</label>
+      <label><input type="checkbox" id="ins"><span data-i18n="lIns"> Insulated (กระจก 2 ชั้นเหมือนกัน)</span></label>
+    </div>
+   </fieldset>
+   <fieldset>
+    <legend><span data-i18n="lgOpt">ตัวเลือก</span></legend>
+    <div class="checks">
+     <label><input type="checkbox" id="sel"><span data-i18n="lSel"> กำหนดความหนาเอง</span></label>
+     <select id="thkSel" disabled aria-label="ความหนากระจก" data-i18n-aria="aThk"></select>
+     <label><input type="checkbox" id="defl"><span data-i18n="lDefl"> ตรวจระยะแอ่นตัว</span> (<span class="defLim">b/240</span>)</label>
+    </div>
+   </fieldset>
+   <fieldset>
+    <legend><span data-i18n="lgProj">ข้อมูลงาน (สำหรับพิมพ์)</span></legend>
+    <label class="row">Project <input type="text" id="pProject" style="grid-column:2/4"></label>
+    <label class="row">Location <input type="text" id="pLocation" style="grid-column:2/4"></label>
+    <label class="row">Item No. <input type="text" id="pItem" style="grid-column:2/4"></label>
+    <label class="row">Prepared by <input type="text" id="pBy" style="grid-column:2/4"></label>
+    <label class="row">Position <input type="text" id="pPos" style="grid-column:2/4"></label>
+   </fieldset>
+  </form>
+  <div class="stage">
+   <div id="msgBox"></div>
+   <div class="stage-top">
+    <svg id="drawing" viewBox="0 0 360 400" role="img" aria-label="รูปกระจกและการยึด" data-i18n-aria="aDraw"></svg>
+    <div id="resBox"></div>
+   </div>
+   <div class="tbl-wrap"><table id="allTbl"></table></div>
+   <div class="actions">
+    <button class="btn primary" type="button" id="btnPrint"><span data-i18n="bPrint">พิมพ์ใบคำนวณ</span></button>
+    <button class="btn" type="button" id="btnSave"><span data-i18n="bSave">บันทึกงาน (.json)</span></button>
+    <button class="btn" type="button" id="btnOpen"><span data-i18n="bOpen">เปิดงาน</span></button>
+    <input type="file" id="fileOpen" accept=".json,application/json" hidden>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="tab" id="tab-rib">
+ <div class="grid">
+  <form onsubmit="return false">
+   <fieldset>
+    <legend><span data-i18n="lgRib">ข้อมูลครีบกระจก</span></legend>
+    <label class="row"><span data-i18n="lRWind">แรงลม, q</span> <input type="number" id="rWl" step="0.01" min="0" value="1.5" list="wlList"><small>kPa</small></label>
+    <label class="row"><span data-i18n="lRW">ความกว้างแผ่นหน้าที่รับ, w</span> <input type="number" id="rW" min="1" value="1000"><small>mm</small></label>
+    <label class="row"><span data-i18n="lRH">ความสูงครีบ, h</span> <input type="number" id="rH" min="1" value="3000"><small>mm</small></label>
+    <label class="row"><span data-i18n="lRT">ความหนาครีบ, t</span> <select id="rT"></select><small>mm</small></label>
+   </fieldset>
+   <fieldset>
+    <legend><span data-i18n="lgRGlass">ชนิดกระจกครีบ</span></legend>
+    <div class="seg" role="radiogroup" aria-label="ชนิดกระจกครีบ" data-i18n-aria="aRGlass">
+      <label><input type="radio" name="rgl" value="AN" checked>Annealed</label>
+      <label><input type="radio" name="rgl" value="HS">Heat Str.</label>
+      <label><input type="radio" name="rgl" value="FT">Tempered</label>
+    </div>
+   </fieldset>
+   <fieldset>
+    <legend><span data-i18n="lgRSide">จำนวนครีบ</span></legend>
+    <div class="radios">
+     <label><input type="radio" name="rside" value="1" checked><span data-i18n="lOne"> ครีบด้านเดียว</span></label>
+     <label><input type="radio" name="rside" value="2"><span data-i18n="lTwo"> ครีบสองด้าน</span></label>
+    </div>
+   </fieldset>
+  </form>
+  <div class="stage">
+   <div class="stage-top">
+    <svg id="ribDrawing" viewBox="0 0 360 440" role="img" aria-label="รูปครีบกระจก" data-i18n-aria="aRDraw"></svg>
+    <div id="ribRes"></div>
+   </div>
+   <div class="tbl-wrap"><table id="ribTbl"></table></div>
+  </div>
+ </div>
+</section>
+
+<section class="tab" id="tab-cfg">
+ <div class="cfg-grid">
+  <fieldset>
+   <legend><span data-i18n="cUnitH">หน่วย</span></legend>
+   <div class="seg" role="radiogroup" data-i18n-aria="cUnitH" aria-label="หน่วย">
+    <label><input type="radio" name="cUnit" value="SI"><span data-i18n="cSI">S.I. (kPa, MPa)</span></label>
+    <label><input type="radio" name="cUnit" value="MET"><span data-i18n="cMET">Metric (kg/m², kg/cm²)</span></label>
+   </div>
+   <p class="note"><span data-i18n="cUnitN">ใช้กับการแสดงผล ช่องกรอกแรงลมยังเป็น kPa</span></p>
+  </fieldset>
+  <fieldset>
+   <legend><span data-i18n="cDefH">ระยะแอ่นตัวที่ยอมให้</span></legend>
+   <table class="cfg"><tbody>
+    <tr><td><span data-i18n="cDefRef">ความยาวอ้างอิง</span></td><td><select id="cDefRef">
+      <option value="b" data-i18n="optB">ด้านยาว b</option><option value="a" data-i18n="optA">ด้านสั้น a</option><option value="span" data-i18n="optSpan">ช่วงที่รับแรง (span)</option></select></td></tr>
+    <tr><td><span data-i18n="cDefL">หารด้วย (L / ...)</span></td><td><input type="number" id="cDef" min="1"></td></tr>
+    <tr><td><span data-i18n="cDefMax">ไม่เกิน (mm, 0 = ไม่จำกัด)</span></td><td><input type="number" id="cDefMax" min="0"></td></tr>
+   </tbody></table>
+  </fieldset>
+  <fieldset class="wide">
+   <legend><span data-i18n="cGtfH">Glass Type Factor, GTF (ลม 3 วินาที)</span></legend>
+   <table class="cfg"><thead><tr><th></th><th><span data-i18n="cGtf1">ชั้นเดียว / Laminated (Table 1)</span></th><th><span data-i18n="cGtfI">Insulated (Table 2)</span></th></tr></thead><tbody>
+    <tr><td>Annealed</td><td><input type="number" step="0.05" id="g1AN"></td><td><input type="number" step="0.05" id="gIAN"></td></tr>
+    <tr><td>Heat Strengthened</td><td><input type="number" step="0.05" id="g1HS"></td><td><input type="number" step="0.05" id="gIHS"></td></tr>
+    <tr><td>Fully Tempered</td><td><input type="number" step="0.05" id="g1FT"></td><td><input type="number" step="0.05" id="gIFT"></td></tr>
+   </tbody></table>
+   <p class="note"><span data-i18n="cGtfN">ค่าเริ่มต้นตาม E1300 ถ้าแก้ค่า ผลคำนวณจะไม่เป็นไปตามมาตรฐาน และใบพิมพ์จะระบุว่าใช้ค่าที่แก้</span></p>
+  </fieldset>
+  <fieldset class="wide">
+   <legend><span data-i18n="cRibH">หน่วยแรงที่ยอมให้ของครีบกระจก</span></legend>
+   <table class="cfg"><thead><tr><th></th><th>MPa</th><th>kg/cm²</th></tr></thead><tbody>
+    <tr><td>Annealed</td><td><input type="number" step="0.1" id="cRibAN"></td><td class="kg" id="kRibAN"></td></tr>
+    <tr><td>Heat Strengthened</td><td><input type="number" step="0.1" id="cRibHS"></td><td class="kg" id="kRibHS"></td></tr>
+    <tr><td>Fully Tempered</td><td><input type="number" step="0.1" id="cRibFT"></td><td class="kg" id="kRibFT"></td></tr>
+   </tbody></table>
+   <p class="note"><span data-i18n="cRibN">ค่าเริ่มต้น 16.2 MPa × GTF มาจากหน่วยแรงที่ใช้สร้างกราฟยึด 2 ด้านของ E1300 (Fig. A1.27)</span></p>
+  </fieldset>
+  <fieldset>
+   <legend><span data-i18n="cUserH">ผู้คำนวณ (เติมให้อัตโนมัติ)</span></legend>
+   <label class="row"><span data-i18n="cBy">ชื่อ</span><input type="text" id="cBy" style="grid-column:2/4"></label>
+   <label class="row"><span data-i18n="cPos">ตำแหน่ง</span><input type="text" id="cPos" style="grid-column:2/4"></label>
+  </fieldset>
+ </div>
+ <div class="actions"><button class="btn" type="button" id="btnDefault"><span data-i18n="bDef">คืนค่าเริ่มต้น</span></button></div>
+ <p class="note"><span data-i18n="cNote">ค่าในหน้านี้จะจำไว้ในเบราว์เซอร์เครื่องนี้ ความหนาต่ำสุดและค่าคงที่ GFPM กำหนดตาม E1300 แก้ไม่ได้</span></p>
+</section>
+
+<section class="tab" id="tab-help">
+ <div class="doc" id="helpDoc"></div>
+</section>
+</main>
+<div id="printSheet"></div>
+
+<script>
+/* ===================== DATA (สร้างจากโมเดล nonlinear + GFPM, ดู README) ===================== */
+const DATA = /*DATA*/null/*END*/;
+</script>
+<script>
+/* ===================== ENGINE: ASTM E1300 ===================== */
+const ENGINE = (() => {
+  const E = 71.7e9, K = 2.86e-53, M = 7, DUR = Math.pow(3/60, 7/16), TARGET = -Math.log(1-0.008);
+  const LNT = Math.log(TARGET);
+  // E1300 Table 4: ความหนาระบุ -> ความหนาต่ำสุด (mm)
+  const TMIN = {2.5:2.16, 3:2.92, 4:3.78, 5:4.57, 6:5.56, 8:7.42, 10:9.02, 12:11.91, 16:15.09, 19:18.26, 22:21.44};
+  // GTF ลม 3 วินาที: Table 1 (ชั้นเดียว/laminated), Table 2 (IG, กระจก 2 ชั้นชนิดเดียวกัน)
+  const GTF1 = {AN:1.0, HS:2.0, FT:4.0};
+  const GTFIG = {AN:0.9, HS:1.8, FT:3.6};
+  // Laminated: designation -> ply nominal (two equal plies + PVB 0.76)
+  const LAM = {5:2.5, 6:3, 8:4, 10:5, 12:6, 16:8, 19:10};
+  const C2 = 21600;          // 2 ด้าน monolithic: NFL = C2 * t^2 / L^2 (kPa, mm) จาก Fig. A1.27
+  const ln = Math.log, exp = Math.exp;
+
+  function interp(x, xs, ys){ // linear, xs increasing; returns {v, out}
+    const n = xs.length;
+    if (x <= xs[0]) return {v: ys[0] + (ys[1]-ys[0])*(x-xs[0])/(xs[1]-xs[0]), out: x < xs[0]-1e-9};
+    if (x >= xs[n-1]) return {v: ys[n-2] + (ys[n-1]-ys[n-2])*(x-xs[n-2])/(xs[n-1]-xs[n-2]), out: x > xs[n-1]+1e-9};
+    let i = 1; while (xs[i] < x) i++;
+    const f = (x-xs[i-1])/(xs[i]-xs[i-1]); return {v: ys[i-1] + f*(ys[i]-ys[i-1]), out:false};
+  }
+  function rowAt(tab, key, AR){ // interpolate a table row in ln(AR)
+    const la = tab.AR.map(ln), x = ln(AR);
+    let out = x < la[0]-1e-9 || x > la[la.length-1]+1e-9;
+    const xc = Math.min(Math.max(x, la[0]), la[la.length-1]);
+    let i = 1; while (i < la.length-1 && la[i] < xc) i++;
+    const f = (xc-la[i-1])/(la[i]-la[i-1]);
+    return {row: tab[key][i-1].map((v,k)=> v + f*(tab[key][i][k]-v)), out};
+  }
+  // ---------- monolithic plate (4 หรือ 3 ด้าน) จากตาราง J(AR, q^) ----------
+  function plateNFL(tab, a, b, tmin, AR){
+    const ab = a*b*1e-6, t = tmin*1e-3;
+    const {row, out} = rowAt(tab, 'J', AR);
+    const need = ln(TARGET/(K*DUR)) - (1-M)*ln(ab) - M*ln(E*t*t);
+    const r = interp(need, row, tab.lq);
+    return {nfl: exp(r.v)*E*Math.pow(t,4)/(ab*ab)/1e3, out: out || r.out};
+  }
+  function plateDefl(tab, a, b, tmin, AR, q){
+    const ab = a*b*1e-6, t = tmin*1e-3;
+    const qh = q*1e3*ab*ab/(E*Math.pow(t,4));
+    const {row} = rowAt(tab, 'w', AR);
+    if (qh <= 0) return 0;
+    const lq = ln(qh);
+    if (lq < tab.lq[0]) return row[0]*exp(lq-tab.lq[0])*tmin; // linear range
+    return interp(lq, tab.lq, row).v*tmin;
+  }
+  // ---------- ค่า NFL จากเส้นในกราฟ E1300 (3 ด้าน และ laminated 4 ด้าน) ----------
+  // ch.curves[k] = [xs[], ys[]] เส้นระดับ ch.levels[k]; x = แกนนอนของกราฟ, y = แกนตั้ง; r = ขอบเขตกราฟ x >= r*y
+  function chartNFL(ch, x, y, r){
+    let out = x > ch.xmax + 1 || y > ch.ymax + 1 || x < r*y - 1;
+    const xs = Math.min(x, ch.xmax);
+    const Y = ch.curves.map(([cx, cy]) => {
+      if (xs < cx[0]) return Math.max(xs/r, 1e-9) < cy[0] ? xs/r*1.0001 : cy[0];
+      if (xs >= cx[cx.length-1]) return cy[cy.length-1];
+      return interp(xs, cx, cy).v;
+    });
+    const L = ch.levels;
+    if (y >= Y[0]) return {nfl: L[0]*(Y[0]/y)**2, out:true};
+    if (y <= Y[Y.length-1]) return {nfl: L[L.length-1]*(Y[Y.length-1]/y)**2, out:true};
+    let k = 0; while (k < Y.length-2 && Y[k+1] > y) k++;
+    const f = (ln(y)-ln(Y[k]))/(ln(Y[k+1])-ln(Y[k]));
+    return {nfl: exp(ln(L[k]) + f*(ln(L[k+1])-ln(L[k]))), out};
+  }
+  // ---------- laminated 4 ด้าน: ตาราง lnB(q) ต่อขนาด (ใช้หาระยะแอ่น) ----------
+  function lamGrid(d, a, AR, fn){
+    const L = DATA.lam4[d];
+    const ls = L.sizes.map(ln), la = L.AR.map(ln);
+    const xs = Math.min(Math.max(ln(a), ls[0]), ls[ls.length-1]), xa = Math.min(Math.max(ln(AR), la[0]), la[la.length-1]);
+    const out = ln(a) < ls[0]-1e-9 || ln(a) > ls[ls.length-1]+1e-9 || ln(AR) > la[la.length-1]+1e-9;
+    let i=1; while(i<la.length-1 && la[i]<xa) i++;
+    let j=1; while(j<ls.length-1 && ls[j]<xs) j++;
+    const fi=(xa-la[i-1])/(la[i]-la[i-1]), fj=(xs-ls[j-1])/(ls[j]-ls[j-1]);
+    const v = (ii,jj)=>fn(L,ii,jj);
+    const r = (1-fi)*((1-fj)*v(i-1,j-1)+fj*v(i-1,j)) + fi*((1-fj)*v(i,j-1)+fj*v(i,j));
+    return {v:r, out};
+  }
+  function curve(L, ii, jj, key){
+    const q=[], y=[];
+    L[key][ii][jj].forEach((v,k)=>{ if(v!==null){ q.push(ln(L.q[k])); y.push(v);} });
+    return {q, y};
+  }
+  function lam4NFL(d, a, b){
+    const g = lamGrid(d, a, b/a, (L,i,j)=>{ const c=curve(L,i,j,'lnB'); return interp(LNT, c.y, c.q).v; });
+    return {nfl: exp(g.v), out: g.out};
+  }
+  function lam4Defl(d, a, b, q){
+    if (q<=0) return 0;
+    return lamGrid(d, a, b/a, (L,i,j)=>{ const c=curve(L,i,j,'w'); return interp(ln(q), c.q, c.y).v; }).v;
+  }
+  // ---------- effective thickness (E1300 X9) สำหรับ laminated 2 ด้าน ----------
+  function hEffW(h1, h2, hv, G, a){
+    const hs = 0.5*(h1+h2)+hv, hs1 = hs*h1/(h1+h2), hs2 = hs*h2/(h1+h2);
+    const Is = h1*hs2*hs2 + h2*hs1*hs1;
+    const Gam = 1/(1 + 9.6*71.7e3*Is*hv/(G*hs*hs*a*a));
+    return Math.cbrt(h1**3 + h2**3 + 12*Gam*Is);
+  }
+  // ---------- รายการความหนา ----------
+  function thkList(lam, ins){
+    const base = lam
+      ? Object.keys(LAM).map(Number).map(d=>({des:d, ply:LAM[d], label:`${LAM[d]}+${LAM[d]} (${d})`, tmin:TMIN[d], lam:true}))
+      : [3,4,5,6,8,10,12,16,19,22].map(t=>({des:t, label:`${t}`, tmin:TMIN[t], lam:false}));
+    if (!ins) return base;
+    return base.filter(x=>!x.lam || x.des<=12).filter(x=>x.lam || x.des<=12)
+      .map(x=>({...x, label: x.lam ? `${x.ply}+${x.ply} / Air / ${x.ply}+${x.ply}` : `${x.des} / Air / ${x.des}`}));
+  }
+  // ---------- NFL & deflection ของ "กระจก 1 แผ่น" ตามการยึด ----------
+  function liteNFL(it, sup, a, b){
+    if (sup==='4'){
+      if (it.lam) return chartNFL(DATA.c4l[it.des], b, a, 1);
+      const r = plateNFL(DATA.t4, a, b, it.tmin, b/a);
+      return {nfl:r.nfl, out: r.out || b/a > 8};
+    }
+    if (sup==='3a' || sup==='3b'){
+      const Lf = sup==='3a'?a:b, Ls = sup==='3a'?b:a;   // Lf = ขอบอิสระ, Ls = ขอบที่ยึดคู่ขนาน
+      const ch = DATA.c3[it.lam?'lam':'mono'][it.des];
+      if (!ch) return {nfl:NaN, out:true, unsupported:true};
+      return chartNFL(ch, Ls, Lf, 0.5);
+    }
+    const L = sup==='2a'?a:b;
+    if (it.lam) return DATA.lam2C[it.des] ? {nfl: DATA.lam2C[it.des]/(L*L), out: L<200||L>3000} : {nfl:NaN, out:true, unsupported:true};
+    return {nfl: C2*it.tmin*it.tmin/(L*L), out: L<250||L>3600||it.des<6};
+  }
+  function liteDefl(it, sup, a, b, q){
+    if (sup==='4'){
+      if (it.lam) return lam4Defl(it.des, a, b, q);
+      return plateDefl(DATA.t4, a, b, it.tmin, b/a, q);
+    }
+    if (sup==='3a' || sup==='3b'){
+      const Lf = sup==='3a'?a:b, Ls = sup==='3a'?b:a;
+      const t = it.lam ? hEffW(TMIN[it.ply]||it.ply, TMIN[it.ply]||it.ply, 0.76, 0.44, Lf) : it.tmin;
+      return plateDefl(DATA.t3, Lf, Ls, t, Ls/Lf, q);
+    }
+    const L = sup==='2a'?a:b;
+    const t = it.lam ? hEffW(TMIN[it.ply]||it.ply, TMIN[it.ply]||it.ply, 0.76, 0.44, L) : it.tmin;
+    return 5*(q/1e3)*L**4/(32*71.7e3*t**3); // simply supported beam (E1300 1.3)
+  }
+  // ---------- คำนวณ 1 ความหนา ----------
+  function calcOne(inp, it, cfg){
+    const {q, a, b, sup, gl, ins} = inp;
+    const n = liteNFL(it, sup, a, b);
+    const gtf = ins ? (cfg.gtfig||GTFIG)[gl] : (cfg.gtf1||GTF1)[gl];
+    const ls = ins ? 2 : 1;                 // lites เหมือนกัน: LS = (t1^3+t2^3)/t1^3 = 2
+    const LR = n.nfl*gtf*ls;
+    const qLite = q/ls;
+    const defl = liteDefl(it, sup, a, b, qLite);
+    const span = (sup==='3b'||sup==='2b') ? b : a;
+    const Lref = cfg.defRef==='a' ? a : cfg.defRef==='span' ? span : b;
+    let dAllow = Lref/cfg.def; if (cfg.defMax>0) dAllow = Math.min(dAllow, cfg.defMax);
+    return {item:it, NFL:n.nfl, GTF:gtf, LS:ls, LR, ratio:q/LR, okS: LR>=q, defl, dAllow, okD: defl<=dAllow,
+            out: !!n.out, unsupported: !!n.unsupported};
+  }
+  function calc(inp, cfg){
+    const list = thkList(inp.lam, inp.ins);
+    const rows = list.map(it=>calcOne(inp, it, cfg));
+    let pick, none=false;
+    if (inp.selIdx!=null) pick = rows[Math.min(inp.selIdx, rows.length-1)];
+    else {
+      pick = rows.find(r=>!r.unsupported && r.okS && (!inp.defl || r.okD));
+      if (!pick){ none=true; pick=rows[rows.length-1]; }
+    }
+    return {rows, pick, none};
+  }
+  // ---------- Rib ----------
+  function rib(inp, cfg){
+    const sa = (typeof cfg.rib==='object') ? cfg.rib[inp.gl] : cfg.rib*GTF1[inp.gl];
+    const t = TMIN[inp.t] || inp.t;
+    const k = inp.two ? 3/8 : 3/4;
+    const r = Math.sqrt(k*inp.W*inp.H*inp.H*(inp.q/1000)/(t*sa));
+    return {r: Math.ceil(r), raw:r, sa, tmin:t};
+  }
+  return {calc, calcOne, rib, thkList, liteNFL, TMIN, GTF1, GTFIG, LAM, C2, hEffW};
+})();
+if (typeof module!=='undefined') module.exports = ENGINE;
+</script>
+<script>
+/* ===================== UI ===================== */
+const I18N = {"th": {"h1": "คำนวณกระจก <span>E1300</span>", "sub": "ความต้านทานแรงลมของกระจกตาม ASTM E1300 (ลม 3 วินาที, Pb = 8/1000) และครีบกระจก", "tabCalc": "คำนวณกระจก", "tabRib": "Rib Glass", "tabCfg": "ตั้งค่า", "tabHelp": "วิธีคำนวณ", "lgData": "ข้อมูล", "lWind": "แรงลมออกแบบ, q", "lA": "ด้านสั้น, a", "lB": "ด้านยาว, b", "lgSup": "การยึดกระจก", "lgGlass": "ชนิดกระจก", "lIns": " Insulated (กระจก 2 ชั้นเหมือนกัน)", "lgOpt": "ตัวเลือก", "lSel": " กำหนดความหนาเอง", "lDefl": " ตรวจระยะแอ่นตัว", "lgProj": "ข้อมูลงาน (สำหรับพิมพ์)", "bPrint": "พิมพ์ใบคำนวณ", "bSave": "บันทึกงาน (.json)", "bOpen": "เปิดงาน", "lgRib": "ข้อมูลครีบกระจก", "lRWind": "แรงลม, q", "lRW": "ความกว้างแผ่นหน้าที่รับ, w", "lRH": "ความสูงครีบ, h", "lRT": "ความหนาครีบ, t", "lgRGlass": "ชนิดกระจกครีบ", "lgRSide": "จำนวนครีบ", "lOne": " ครีบด้านเดียว", "lTwo": " ครีบสองด้าน", "cDefH": "ระยะแอ่นตัวที่ยอมให้", "cDefL": "หารด้วย (L / ...)", "cRibH": "หน่วยแรงที่ยอมให้ของครีบกระจก", "bDef": "คืนค่าเริ่มต้น", "cNote": "ค่าในหน้านี้จะจำไว้ในเบราว์เซอร์เครื่องนี้ ความหนาต่ำสุดและค่าคงที่ GFPM กำหนดตาม E1300 แก้ไม่ได้", "aGlass": "ชนิดกระจก", "aThk": "ความหนากระจก", "aDraw": "รูปกระจกและการยึด", "aRGlass": "ชนิดกระจกครีบ", "aRDraw": "รูปครีบกระจก", "s4": "4 ด้าน", "s3a": "3 ด้าน (ขอบสั้นอิสระ)", "s3b": "3 ด้าน (ขอบยาวอิสระ)", "s2a": "2 ด้าน (ยึดขอบยาว)", "s2b": "2 ด้าน (ยึดขอบสั้น)", "legend": "แถบเทา = ขอบที่ยึด · เส้นประแดง = ขอบอิสระ", "eInput": "กรอกแรงลม ด้านสั้น a และด้านยาว b ให้ครบ (มากกว่า 0)", "eAB": "ด้านสั้น a ต้องไม่ยาวกว่าด้านยาว b", "eIns": "E1300 ครอบคลุมกระจก Insulated เฉพาะการยึด 4 ด้าน", "e3": "ยึด 3 ด้าน: ความยาวขอบที่ยึดตั้งฉากกับขอบอิสระ ต้องไม่น้อยกว่า 0.5 เท่าของขอบอิสระ (E1300 3.2.2) — ตอนนี้ a/b = ", "w15": "แรงลมเกิน 15 kPa ซึ่งเกินขอบเขตของ E1300", "wNone": "ไม่มีความหนาในรายการที่ผ่าน ให้ลดขนาดกระจก เปลี่ยนชนิดกระจก หรือเปลี่ยนการยึด (แสดงผลของความหนาสูงสุด)", "wOut": "ขนาดหรือแรงอยู่นอกช่วงกราฟของ E1300 ค่าที่ได้เป็นการต่อเส้น ควรตรวจซ้ำด้วยวิธีวิเคราะห์โดยวิศวกร", "pass": "ผ่าน", "fail": "ไม่ผ่าน", "manual": "(กำหนดเอง)", "auto": "(เลือกอัตโนมัติ)", "rGlass": "ชนิดกระจก", "rTmin": "ความหนาต่ำสุด (E1300)", "rDefl": "ระยะแอ่นตัว", "perLite": " (ต่อแผ่น)", "notChk": "(ไม่ได้ตรวจ)", "thThk": "ความหนา (mm)", "thDefl": "ระยะแอ่น (mm)", "thRes": "ผล", "outNote": "* อยู่นอกช่วงกราฟ E1300", "eRib": "กรอกแรงลม ความกว้าง w และความสูง h ให้ครบ", "ribW": "mm ความกว้างครีบ, r", "ribT": "ความหนาครีบ", "ribMin": "ต่ำสุด", "ribN": "จำนวนครีบ", "two": "สองด้าน", "one": "ด้านเดียว", "ribSa": "หน่วยแรงที่ยอมให้", "ribTh": "ความหนาครีบ (mm)", "oneMm": "ด้านเดียว (mm)", "twoMm": "สองด้าน (mm)", "eOpen": "เปิดไฟล์ไม่ได้: ไฟล์ไม่ใช่งานที่บันทึกจากโปรแกรมนี้", "title": "คำนวณกระจก ASTM E1300", "cUnitH": "หน่วย", "cSI": "S.I. (kPa, MPa)", "cMET": "Metric (kg/m², kg/cm²)", "cUnitN": "ใช้กับการแสดงผล ช่องกรอกแรงลมยังเป็น kPa", "cDefRef": "ความยาวอ้างอิง", "optB": "ด้านยาว b", "optA": "ด้านสั้น a", "optSpan": "ช่วงที่รับแรง (span)", "cDefMax": "ไม่เกิน (mm, 0 = ไม่จำกัด)", "cGtfH": "Glass Type Factor, GTF (ลม 3 วินาที)", "cGtf1": "ชั้นเดียว / Laminated (Table 1)", "cGtfI": "Insulated (Table 2)", "cGtfN": "ค่าเริ่มต้นตาม E1300 ถ้าแก้ค่า ผลคำนวณจะไม่เป็นไปตามมาตรฐาน และใบพิมพ์จะระบุว่าใช้ค่าที่แก้", "cRibN": "ค่าเริ่มต้น 16.2 MPa × GTF มาจากหน่วยแรงที่ใช้สร้างกราฟยึด 2 ด้านของ E1300 (Fig. A1.27)", "cUserH": "ผู้คำนวณ (เติมให้อัตโนมัติ)", "cBy": "ชื่อ", "cPos": "ตำแหน่ง", "wGtf": "GTF ถูกแก้จากค่าตาม E1300 (แท็บตั้งค่า) ผลคำนวณจึงไม่เป็นไปตามมาตรฐาน", "ribPlan": "รูปตัดแปลน", "ribWind": "ด้านรับลม"}, "en": {"h1": "Glass Calculator <span>E1300</span>", "sub": "Wind load resistance of glass to ASTM E1300 (3-second load, Pb = 8/1000) and glass fins", "tabCalc": "Glass", "tabRib": "Glass Fin", "tabCfg": "Settings", "tabHelp": "Method", "lgData": "Input", "lWind": "Design wind load, q", "lA": "Short side, a", "lB": "Long side, b", "lgSup": "Support", "lgGlass": "Glass type", "lIns": " Insulated (two identical lites)", "lgOpt": "Options", "lSel": " Choose thickness", "lDefl": " Check deflection", "lgProj": "Project (for printout)", "bPrint": "Print calculation", "bSave": "Save job (.json)", "bOpen": "Open job", "lgRib": "Fin input", "lRWind": "Wind load, q", "lRW": "Tributary face width, w", "lRH": "Fin height, h", "lRT": "Fin thickness, t", "lgRGlass": "Fin glass type", "lgRSide": "Fin arrangement", "lOne": " One-side fin", "lTwo": " Two-side fin", "cDefH": "Allowable deflection", "cDefL": "Divide by (L / ...)", "cRibH": "Glass fin allowable stress", "bDef": "Restore defaults", "cNote": "Settings are remembered in this browser. Minimum thicknesses and GFPM constants follow E1300 and cannot be changed.", "aGlass": "Glass type", "aThk": "Glass thickness", "aDraw": "Glass and support drawing", "aRGlass": "Fin glass type", "aRDraw": "Glass fin drawing", "s4": "4 sides", "s3a": "3 sides (short edge free)", "s3b": "3 sides (long edge free)", "s2a": "2 sides (long edges)", "s2b": "2 sides (short edges)", "legend": "grey bar = supported edge · red dash = free edge", "eInput": "Enter wind load, short side a and long side b (greater than 0)", "eAB": "Short side a must not be longer than long side b", "eIns": "E1300 covers insulating glass with four-sided support only", "e3": "Three sides: the supported edge perpendicular to the free edge must be at least 0.5 × the free edge (E1300 3.2.2) — now a/b = ", "w15": "Wind load exceeds 15 kPa, outside the scope of E1300", "wNone": "No thickness in the list passes. Reduce the size, change the glass type or the support (showing the thickest option)", "wOut": "Size or load is outside the E1300 chart range; the value is extrapolated and should be checked by an engineer", "pass": "PASS", "fail": "FAIL", "manual": "(chosen)", "auto": "(auto-selected)", "rGlass": "Glass", "rTmin": "Minimum thickness (E1300)", "rDefl": "Deflection", "perLite": " (per lite)", "notChk": "(not checked)", "thThk": "Thickness (mm)", "thDefl": "Deflection (mm)", "thRes": "Result", "outNote": "* outside E1300 chart range", "eRib": "Enter wind load, width w and height h", "ribW": "mm fin depth, r", "ribT": "Fin thickness", "ribMin": "min.", "ribN": "Fins", "two": "Two-side", "one": "One-side", "ribSa": "Allowable stress", "ribTh": "Fin thickness (mm)", "oneMm": "One-side (mm)", "twoMm": "Two-side (mm)", "eOpen": "Cannot open: the file was not saved by this program", "title": "Glass Calculator ASTM E1300", "cUnitH": "Units", "cSI": "S.I. (kPa, MPa)", "cMET": "Metric (kg/m², kg/cm²)", "cUnitN": "Applies to displayed results; wind input stays in kPa", "cDefRef": "Reference length", "optB": "Long side b", "optA": "Short side a", "optSpan": "Loaded span", "cDefMax": "Not more than (mm, 0 = no limit)", "cGtfH": "Glass type factor, GTF (3-second load)", "cGtf1": "Single / laminated (Table 1)", "cGtfI": "Insulating (Table 2)", "cGtfN": "Defaults follow E1300. Edited values take the result outside the standard and are noted on the printout.", "cRibN": "Default 16.2 MPa × GTF is the stress behind the E1300 two-sided chart (Fig. A1.27)", "cUserH": "Prepared by (auto-filled)", "cBy": "Name", "cPos": "Position", "wGtf": "GTF has been changed from the E1300 values (Settings); results do not follow the standard", "ribPlan": "Plan section", "ribWind": "wind side"}};
+let LANG = (()=>{ try{ return localStorage.getItem('glcalc.lang')||'th'; }catch(e){ return 'th'; } })();
+const t = k => (I18N[LANG]&&I18N[LANG][k]) ?? I18N.th[k] ?? k;
+function applyLang(){
+  document.documentElement.lang = LANG;
+  document.title = t('title');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.innerHTML = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label', t(el.dataset.i18nAria)));
+  const b=document.getElementById('btnLang'); if(b){ b.textContent = LANG==='th'?'EN':'ไทย'; b.setAttribute('aria-label', LANG==='th'?'Switch to English':'เปลี่ยนเป็นภาษาไทย'); }
+}
+const $ = id => document.getElementById(id);
+const SUPS = [
+  {v:'4',  key:'s4',          en:'Four sides',                     edges:'tblr', full:true},
+  {v:'3a', key:'s3a', en:'Three sides, short edge free', edges:'blr'},
+  {v:'3b', key:'s3b',  en:'Three sides, long edge free',  edges:'tbr'},
+  {v:'2a', key:'s2a',    en:'Two sides, long edges supported (span a)', edges:'lr'},
+  {v:'2b', key:'s2b',   en:'Two sides, short edges supported (span b)', edges:'tb'},
+];
+const GLN = {AN:'Annealed', HS:'Heat Strengthened', FT:'Fully Tempered'};
+const DEF_CFG = {unit:'SI', def:240, defRef:'b', defMax:0,
+  gtf1:{AN:1.0,HS:2.0,FT:4.0}, gtfig:{AN:0.9,HS:1.8,FT:3.6}, rib:{AN:16.2,HS:32.4,FT:64.8}, by:'', pos:''};
+const clone = o => JSON.parse(JSON.stringify(o));
+const CFG_KEY = 'glcalc.e1300.cfg';
+let cfg = (()=>{ try{ const c={...clone(DEF_CFG), ...JSON.parse(localStorage.getItem(CFG_KEY)||'{}')};
+  if(typeof c.rib!=='object') c.rib=clone(DEF_CFG.rib); return c; }catch(e){ return clone(DEF_CFG); } })();
+const KG=0.0981; // 1 kg/cm² = 0.0981 MPa
+var fP = kpa => cfg.unit==='MET' ? `${Number.isFinite(kpa)?(kpa/0.00981).toLocaleString('en-US',{maximumFractionDigits:1}):'–'} kg/m²` : `${f2(kpa)} kPa`;
+const fS = mpa => cfg.unit==='MET' ? `${f2(mpa/KG)} kg/cm²` : `${f2(mpa)} MPa`;
+const pU = () => cfg.unit==='MET' ? 'kg/m²' : 'kPa';
+const gtfEdited = () => ['AN','HS','FT'].some(g=>cfg.gtf1[g]!==DEF_CFG.gtf1[g]||cfg.gtfig[g]!==DEF_CFG.gtfig[g]);
+const defLabel = () => `${cfg.defRef==='span'?'L':cfg.defRef}/${cfg.def}${cfg.defMax>0?`, ≤ ${cfg.defMax} mm`:''}`;
+const saveCfg = ()=>{ try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(e){} };
+const f2 = n => Number.isFinite(n) ? n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '–';
+
+function supIcon(edges){
+  const bar=(x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="var(--frame)"/>`;
+  let s=`<svg width="26" height="32" viewBox="0 0 26 32" aria-hidden="true"><rect x="5" y="5" width="16" height="22" fill="var(--glass-tint)" stroke="var(--glass)"/>`;
+  if(edges.includes('t'))s+=bar(4,1,18,3); if(edges.includes('b'))s+=bar(4,28,18,3);
+  if(edges.includes('l'))s+=bar(1,4,3,24); if(edges.includes('r'))s+=bar(22,4,3,24);
+  return s+'</svg>';
+}
+$('supList').innerHTML = SUPS.map((s,i)=>`<label class="${s.full?'full':''}"><input type="radio" name="sup" value="${s.v}" ${i===0?'checked':''}>${supIcon(s.edges)}<span data-i18n="${s.key}">${t(s.key)}</span></label>`).join('');
+
+function readInput(){
+  return {
+    q: parseFloat($('wl').value), a: parseFloat($('a').value), b: parseFloat($('b').value),
+    sup: document.querySelector('[name=sup]:checked').value,
+    gl: document.querySelector('[name=gl]:checked').value,
+    lam: $('lam').checked, ins: $('ins').checked, defl: $('defl').checked,
+    selIdx: $('sel').checked ? parseInt($('thkSel').value) : null
+  };
+}
+function fillThk(){
+  const prev = $('thkSel').value;
+  const list = ENGINE.thkList($('lam').checked, $('ins').checked);
+  $('thkSel').innerHTML = list.map((x,i)=>`<option value="${i}">${x.label} mm</option>`).join('');
+  if (prev!=='' && prev < list.length) $('thkSel').value = prev;
+  $('thkSel').disabled = !$('sel').checked;
+}
+const glassName = inp => (inp.ins?'Insulated ':'')+(inp.lam?'Laminated ':'')+GLN[inp.gl];
+
+function drawPane(inp, pick){
+  const W=360, H=400, a=inp.a>0?inp.a:1, b=inp.b>0?inp.b:1;
+  const sc=Math.min(200/a, 270/b), w=a*sc, h=b*sc, x=(W-w)/2-20, y=40;
+  const e=SUPS.find(s=>s.v===inp.sup).edges, fr=7;
+  let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="var(--glass-tint)" stroke="var(--glass)" stroke-width="1.5"/>`;
+  s+=`<line x1="${x+w*.15}" y1="${y+h*.35}" x2="${x+w*.45}" y2="${y+h*.12}" stroke="var(--glass)" stroke-opacity=".35" stroke-width="2"/>`;
+  s+=`<line x1="${x+w*.2}" y1="${y+h*.45}" x2="${x+w*.55}" y2="${y+h*.18}" stroke="var(--glass)" stroke-opacity=".2" stroke-width="1.5"/>`;
+  const free=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--fail)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  const bar=(X,Y,ww,hh)=>`<rect x="${X}" y="${Y}" width="${ww}" height="${hh}" fill="var(--frame)"/>`;
+  s += e.includes('t')?bar(x-fr,y-fr,w+2*fr,fr):free(x,y,x+w,y);
+  s += e.includes('b')?bar(x-fr,y+h,w+2*fr,fr):free(x,y+h,x+w,y+h);
+  s += e.includes('l')?bar(x-fr,y-fr,fr,h+2*fr):free(x,y,x,y+h);
+  s += e.includes('r')?bar(x+w,y-fr,fr,h+2*fr):free(x+w,y,x+w,y+h);
+  const dy=y+h+30, dx=x+w+32;
+  s+=`<g stroke="var(--ink)" stroke-width="1"><line x1="${x}" y1="${dy}" x2="${x+w}" y2="${dy}"/><line x1="${x}" y1="${dy-6}" x2="${x}" y2="${dy+6}"/><line x1="${x+w}" y1="${dy-6}" x2="${x+w}" y2="${dy+6}"/>`;
+  s+=`<line x1="${dx}" y1="${y}" x2="${dx}" y2="${y+h}"/><line x1="${dx-6}" y1="${y}" x2="${dx+6}" y2="${y}"/><line x1="${dx-6}" y1="${y+h}" x2="${dx+6}" y2="${y+h}"/></g>`;
+  s+=`<text x="${x+w/2}" y="${dy+20}" text-anchor="middle" fill="var(--ink)" font-size="13">a = ${inp.a||'–'} mm</text>`;
+  s+=`<text x="${dx+10}" y="${y+h/2}" fill="var(--ink)" font-size="13" transform="rotate(90 ${dx+10} ${y+h/2})" text-anchor="middle">b = ${inp.b||'–'} mm</text>`;
+  if(pick) s+=`<text x="${x+w/2}" y="${y+h/2+8}" text-anchor="middle" fill="var(--glass)" font-size="${pick.item.label.length>8?13:20}" font-weight="700">${pick.item.label} mm</text>`;
+  s+=`<text x="12" y="${H-8}" fill="var(--muted)" font-size="11">${t('legend')}</text>`;
+  $('drawing').innerHTML=s;
+}
+
+// รูปหน้าตัดความหนากระจก (แบบ GL300): lites = [[ply,ply],[ply]] จากนอกเข้าใน, มีช่องอากาศระหว่าง lites
+function sectionSVG(lites, label, opts={}){
+  const W=360, x0=40, x1=290, gapX=(x0+x1)/2, PV=0.76, AIR=12;
+  const seq=[]; lites.forEach((lite,i)=>{ if(i) seq.push({air:true,t:AIR}); lite.forEach((t,j)=>{ if(j) seq.push({pvb:true,t:PV}); seq.push({glass:true,t}); }); });
+  const total=seq.reduce((s,e)=>s+e.t,0);
+  const k=Math.min(3.2, 60/total);                  // px ต่อ mm
+  const px=e=>Math.max(e.pvb?1.5:e.air?10:3, e.t*k);
+  const H=seq.reduce((s,e)=>s+px(e),0), y0=40;
+  let y=y0, s='';
+  const brk=(yA,yB)=>`<path d="M${gapX-5},${yA-4} L${gapX-5},${yB+4} M${gapX+5},${yA-4} L${gapX+5},${yB+4}" stroke="var(--panel,#fff)" stroke-width="8"/>`+
+      `<path d="M${gapX-5},${yA-5} L${gapX-5},${yB+5} M${gapX+5},${yA-5} L${gapX+5},${yB+5}" stroke="var(--ink)" stroke-width="1"/>`;
+  for(const e of seq){
+    const h=px(e);
+    if(e.glass) s+=`<rect x="${x0}" y="${y}" width="${x1-x0}" height="${h}" fill="var(--glass-tint)" stroke="var(--glass)" stroke-width="1.2"/>`;
+    if(e.pvb) s+=`<rect x="${x0}" y="${y}" width="${x1-x0}" height="${h}" fill="var(--glass)" opacity=".7"/>`;
+    if(e.air){ s+=`<rect x="${x0}" y="${y}" width="10" height="${h}" fill="var(--frame)"/><rect x="${x1-10}" y="${y}" width="10" height="${h}" fill="var(--frame)"/>`;
+               s+=`<text x="${x0+18}" y="${y+h/2+4}" fill="var(--muted)" font-size="10">Air</text>`; }
+    y+=h;
+  }
+  s+=brk(y0,y);
+  // เส้นบอกความหนา (ขวา) แบบ GL300
+  const dx=x1+16;
+  s+=`<g stroke="var(--ink)" stroke-width="1" fill="none"><line x1="${x1+2}" y1="${y0}" x2="${dx+14}" y2="${y0}"/><line x1="${x1+2}" y1="${y}" x2="${dx+14}" y2="${y}"/>`+
+     `<line x1="${dx+6}" y1="${y0-22}" x2="${dx+6}" y2="${y0}"/><line x1="${dx+6}" y1="${y}" x2="${dx+6}" y2="${y+20}"/><line x1="${dx+6}" y1="${y0-22}" x2="${dx+30}" y2="${y0-22}"/></g>`+
+     `<path d="M${dx+3},${y0-6} L${dx+6},${y0} L${dx+9},${y0-6}" fill="var(--ink)"/><path d="M${dx+3},${y+6} L${dx+6},${y} L${dx+9},${y+6}" fill="var(--ink)"/>`;
+  s+=`<text x="${dx+32}" y="${y0-27}" fill="var(--glass)" font-size="13" font-weight="600" text-anchor="end">${label} mm</text>`;
+  const vh=y+28;
+  return `<svg class="sec" viewBox="0 0 ${W} ${vh}" role="img" aria-label="${label} mm" style="width:100%;max-width:360px;height:auto;margin-top:10px">${s}</svg>`;
+}
+const litesOf = (it, ins) => { const lite = it.lam ? [it.ply, it.ply] : [it.des]; return ins ? [lite, lite] : [lite]; };
+
+let last=null;
+function render(){
+  fillThk();
+  const inp=readInput();
+  $('wlKg').textContent = inp.q>0 ? `= ${f2(inp.q/0.00981)} kg/m²` : '';
+  document.querySelectorAll('.defLim').forEach(e=>e.textContent=defLabel());
+  const errs=[], warns=[];
+  if(!(inp.q>0)||!(inp.a>0)||!(inp.b>0)) errs.push(t('eInput'));
+  else if(inp.a>inp.b) errs.push(t('eAB'));
+  if(inp.ins && inp.sup!=='4') errs.push(t('eIns'));
+  if(inp.sup==='3b' && inp.a/inp.b<0.5) errs.push(t('e3')+f2(inp.a/inp.b));
+  if(inp.q>15) warns.push(t('w15'));
+  if(gtfEdited()) warns.push(t('wGtf'));
+  if(errs.length){ $('msgBox').innerHTML=errs.map(e=>`<p class="msg">${e}</p>`).join(''); $('resBox').innerHTML=''; $('allTbl').innerHTML=''; drawPane(inp,null); last=null; return; }
+  const out=ENGINE.calc(inp,cfg), p=out.pick;
+  last={inp,out};
+  if(out.none) warns.push(t('wNone'));
+  if(p.out) warns.push(t('wOut'));
+  $('msgBox').innerHTML=warns.map(e=>`<p class="msg warn">${e}</p>`).join('');
+  const pass = p.okS && (!inp.defl || p.okD);
+  $('resBox').innerHTML=`
+    <p class="verdict ${pass?'ok':'ng'}">${pass?t('pass'):t('fail')}</p>
+    <p class="thk">${p.item.label} <small>mm ${inp.selIdx!=null?t('manual'):t('auto')}</small></p>
+    <dl class="res">
+      <dt>${t('rGlass')}</dt><dd>${glassName(inp)}</dd>
+      <dt>${t('rTmin')}</dt><dd>${f2(p.item.tmin)} mm${p.item.lam?' (designation)':''}</dd>
+      <dt>NFL</dt><dd>${fP(p.NFL)}</dd>
+      <dt>GTF${inp.ins?' / LS':''}</dt><dd>${p.GTF}${inp.ins?' / '+p.LS:''}</dd>
+      <dt>Load resistance, LR</dt><dd class="${p.okS?'ok':'ng'}">${fP(p.LR)} ${p.okS?'≥':'<'} ${fP(inp.q)}</dd>
+      <dt>q / LR</dt><dd>${f2(p.ratio)}</dd>
+      <dt>${t('rDefl')}${inp.ins?t('perLite'):''}</dt><dd class="${inp.defl?(p.okD?'ok':'ng'):''}">${f2(p.defl)} mm ${inp.defl?`${p.okD?'≤':'>'} ${f2(p.dAllow)} mm (${defLabel()})`:t('notChk')}</dd>
+    </dl>${sectionSVG(litesOf(p.item, inp.ins), p.item.label)}`;
+  $('allTbl').innerHTML=`<thead><tr><th>${t('thThk')}</th><th>NFL (${pU()})</th><th>LR (${pU()})</th><th>q/LR</th><th>${t('thDefl')}</th><th>${t('thRes')}</th></tr></thead><tbody>${
+    out.rows.map(x=>{const ok=x.okS&&(!inp.defl||x.okD);return `<tr class="${x===p?'pick':''}"><td>${x.item.label}${x.out?' *':''}</td><td>${fP(x.NFL).split(' ')[0]}</td><td class="${x.okS?'':'ng'}">${fP(x.LR).split(' ')[0]}</td><td>${f2(x.ratio)}</td><td class="${inp.defl&&!x.okD?'ng':''}">${f2(x.defl)}</td><td class="${ok?'ok':'ng'}">${ok?t('pass'):t('fail')}</td></tr>`}).join('')}</tbody>`
+    + (out.rows.some(x=>x.out)?`<caption style="caption-side:bottom;text-align:left" class="note">${t('outNote')}</caption>`:'');
+  drawPane(inp,p);
+}
+
+// ---------- Rib ----------
+$('rT').innerHTML=[10,12,16,19].map(t=>`<option>${t}</option>`).join(''); $('rT').value='12';
+function drawRib(inp,res){
+  // มุมมองแบบ GL300: รูปด้านหน้ากระจก + ครีบเอียงแบบ oblique ที่รอยต่อ และรูปตัดแปลนด้านล่าง
+  const ink='var(--ink)', gl='var(--glass)', tint='var(--glass-tint)';
+  const x0=70, y0=95, w=200, h=250, jx=x0+w/2;               // แผ่นหน้า กว้าง w, รอยต่อ (ครีบ) อยู่กลาง
+  const rr=res?res.r:150, d=Math.max(30,Math.min(85,rr*0.3)); // ความลึกครีบที่วาด (สเกลตาม r)
+  const ox=-d*0.6, oy=-d*0.8;                                  // ทิศ oblique: ขึ้นซ้าย
+  let s='';
+  s+=`<rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="${tint}" stroke="${gl}" stroke-width="1.5"/>`;
+  s+=`<line x1="${jx}" y1="${y0}" x2="${jx}" y2="${y0+h}" stroke="${gl}" stroke-width="1.5"/>`;
+  if(inp.two){ // ครีบด้านหลังกระจก: เส้นประ
+    s+=`<polygon points="${jx},${y0} ${jx-ox},${y0-oy} ${jx-ox},${y0+h-oy} ${jx},${y0+h}" fill="none" stroke="${ink}" stroke-width="1" stroke-dasharray="5 4"/>`;
+  }
+  // ครีบด้านหน้า
+  s+=`<polygon points="${jx},${y0} ${jx+ox},${y0+oy} ${jx+ox},${y0+h+oy} ${jx},${y0+h}" fill="${gl}" fill-opacity=".35" stroke="${ink}" stroke-width="1.2"/>`;
+  // มิติ r ขนานกับขอบบนของครีบ
+  const nx=0.8*12, ny=-0.6*12, ax=jx+nx, ay=y0+ny, bx=jx+ox+nx, by=y0+oy+ny;
+  s+=`<g stroke="${ink}" stroke-width="1"><line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}"/><line x1="${jx}" y1="${y0}" x2="${ax+nx*0.4}" y2="${ay+ny*0.4}"/><line x1="${jx+ox}" y1="${y0+oy}" x2="${bx+nx*0.4}" y2="${by+ny*0.4}"/></g>`;
+  s+=`<text x="${(ax+bx)/2+14}" y="${(ay+by)/2-6}" fill="${ink}" font-size="13">r = ${res?res.r:'–'} mm</text>`;
+  // มิติ h
+  const hx=x0+w+26;
+  s+=`<g stroke="${ink}" stroke-width="1"><line x1="${hx}" y1="${y0}" x2="${hx}" y2="${y0+h}"/><line x1="${hx-6}" y1="${y0}" x2="${hx+6}" y2="${y0}"/><line x1="${hx-6}" y1="${y0+h}" x2="${hx+6}" y2="${y0+h}"/></g>`;
+  s+=`<text x="${hx+8}" y="${y0+h/2}" fill="${ink}" font-size="13">h = ${inp.H||'–'}</text>`;
+  // มิติ w (ความกว้างที่ครีบรับ) ด้านล่าง
+  const wy=y0+h+(inp.two?-oy:0)+22;
+  s+=`<g stroke="${ink}" stroke-width="1"><line x1="${x0}" y1="${wy}" x2="${x0+w}" y2="${wy}"/><line x1="${x0}" y1="${wy-6}" x2="${x0}" y2="${wy+6}"/><line x1="${x0+w}" y1="${wy-6}" x2="${x0+w}" y2="${wy+6}"/></g>`;
+  s+=`<text x="${x0+w/2}" y="${wy+18}" text-anchor="middle" fill="${ink}" font-size="13">w = ${inp.W||'–'} mm</text>`;
+  // รูปตัดแปลน (ขยาย) ด้านล่าง
+  const rd=Math.max(14,Math.min(46,rr*0.16)), top2=inp.two?rd:0, py=wy+48+top2, pw=w;
+  s+=`<text x="${x0}" y="${py-top2-12}" fill="var(--muted)" font-size="11">${t('ribPlan')}</text>`;
+  s+=`<rect x="${x0}" y="${py}" width="${pw}" height="6" fill="${tint}" stroke="${gl}"/>`;
+  s+=`<rect x="${jx-3}" y="${py+6}" width="6" height="${rd}" fill="${gl}"/>`;
+  if(inp.two) s+=`<rect x="${jx-3}" y="${py-rd}" width="6" height="${rd}" fill="${gl}"/>`;
+  s+=`<text x="${jx+10}" y="${py+6+rd/2+4}" fill="${ink}" font-size="12">r</text>`;
+  s+=`<text x="${x0+pw+8}" y="${py+6}" fill="var(--muted)" font-size="11">${t('ribWind')}</text>`;
+  $('ribDrawing').setAttribute('viewBox',`0 0 360 ${py+rd+20}`);
+  $('ribDrawing').innerHTML=s;
+}
+function renderRib(){
+  const inp={q:parseFloat($('rWl').value),W:parseFloat($('rW').value),H:parseFloat($('rH').value),t:parseFloat($('rT').value),
+    gl:document.querySelector('[name=rgl]:checked').value, two:document.querySelector('[name=rside]:checked').value==='2'};
+  if(!(inp.q>0&&inp.W>0&&inp.H>0)){ $('ribRes').innerHTML=`<p class="msg">${t('eRib')}</p>`; $('ribTbl').innerHTML=''; drawRib(inp,null); return; }
+  const r=ENGINE.rib(inp,cfg);
+  $('ribRes').innerHTML=`<p class="thk">${r.r} <small>${t('ribW')}</small></p>
+   <dl class="res"><dt>${t('ribT')}</dt><dd>${inp.t} mm (${t('ribMin')} ${f2(r.tmin)} mm)</dd><dt>${t('rGlass')}</dt><dd>${GLN[inp.gl]}</dd>
+   <dt>${t('ribN')}</dt><dd>${inp.two?t('two'):t('one')}</dd>
+   <dt>${t('ribSa')}</dt><dd>${fS(r.sa)}</dd></dl>`;
+  $('ribTbl').innerHTML=`<thead><tr><th>${t('ribTh')}</th><th>${t('oneMm')}</th><th>${t('twoMm')}</th></tr></thead><tbody>${
+    [10,12,16,19].map(t=>`<tr class="${t===inp.t?'pick':''}"><td>${t}</td><td>${ENGINE.rib({...inp,t,two:false},cfg).r}</td><td>${ENGINE.rib({...inp,t,two:true},cfg).r}</td></tr>`).join('')}</tbody>`;
+  drawRib(inp,r);
+}
+
+// ---------- Config ----------
+function showCfg(){
+  document.querySelectorAll('[name=cUnit]').forEach(r=>r.checked=(r.value===cfg.unit));
+  $('cDef').value=cfg.def; $('cDefRef').value=cfg.defRef; $('cDefMax').value=cfg.defMax;
+  ['AN','HS','FT'].forEach(g=>{ $('g1'+g).value=cfg.gtf1[g]; $('gI'+g).value=cfg.gtfig[g]; $('cRib'+g).value=cfg.rib[g]; $('kRib'+g).textContent=f2(cfg.rib[g]/KG); });
+  $('cBy').value=cfg.by; $('cPos').value=cfg.pos;
+}
+function cfgChanged(){ saveCfg(); showCfg(); render(); renderRib(); renderHelp(); }
+document.querySelectorAll('[name=cUnit]').forEach(r=>r.addEventListener('change',()=>{ cfg.unit=r.value; cfgChanged(); }));
+$('cDefRef').addEventListener('change',e=>{ cfg.defRef=e.target.value; cfgChanged(); });
+$('cDef').addEventListener('change',e=>{ const v=parseFloat(e.target.value); if(v>0){cfg.def=v;} cfgChanged(); });
+$('cDefMax').addEventListener('change',e=>{ const v=parseFloat(e.target.value); cfg.defMax=v>0?v:0; cfgChanged(); });
+['AN','HS','FT'].forEach(g=>{
+  $('g1'+g).addEventListener('change',e=>{ const v=parseFloat(e.target.value); if(v>0) cfg.gtf1[g]=v; cfgChanged(); });
+  $('gI'+g).addEventListener('change',e=>{ const v=parseFloat(e.target.value); if(v>0) cfg.gtfig[g]=v; cfgChanged(); });
+  $('cRib'+g).addEventListener('change',e=>{ const v=parseFloat(e.target.value); if(v>0) cfg.rib[g]=v; cfgChanged(); });
+});
+$('cBy').addEventListener('change',e=>{ cfg.by=e.target.value; saveCfg(); if(!$('pBy').value) $('pBy').value=cfg.by; });
+$('cPos').addEventListener('change',e=>{ cfg.pos=e.target.value; saveCfg(); if(!$('pPos').value) $('pPos').value=cfg.pos; });
+$('btnDefault').onclick=()=>{ const keep={by:cfg.by,pos:cfg.pos}; cfg={...clone(DEF_CFG),...keep}; cfgChanged(); };
+
+// ---------- Help ----------
+function renderHelp(){ $('helpDoc').innerHTML = LANG==='en' ? `
+ <h3>Principle (ASTM E1300)</h3>
+ <p><code>LR = NFL × GTF × LS</code>, acceptable when <code>LR ≥ q</code> (q = 3-second design wind load)</p>
+ <ul>
+  <li><b>NFL</b> (non-factored load): load at which annealed glass breaks 8 in 1,000 lites (Pb = 0.008), using minimum thicknesses from Table 4</li>
+  <li><b>GTF</b> 3-second load: single/laminated AN 1.0, HS 2.0, FT 4.0 (Table 1); insulating glass, both lites the same type AN 0.9, HS 1.8, FT 3.6 (Table 2)</li>
+  <li><b>LS</b> insulating glass with equal lites = (t₁³+t₂³)/t₁³ = 2; each lite carries q/2</li>
+ </ul>
+ <h3>Source of NFL</h3>
+ <ul>
+  <li><b>Four sides (monolithic):</b> E1300 analytical procedure (6.3): simply supported plate, edges free to slip in plane, nonlinear (von Kármán) analysis with the failure prediction model
+   <code>B = k (t<sub>d</sub>/60)<sup>m/16</sup> ∫(c·σ<sub>max</sub>)<sup>m</sup> dA</code>, <code>Pb = 1 − e<sup>−B</sup></code>, m = 7, k = 2.86×10⁻⁵³ N⁻⁷m¹², t<sub>d</sub> = 3 s, E = 71.7 GPa, ν = 0.22, c = biaxial factor (polynomial of σ<sub>min</sub>/σ<sub>max</sub>).
+   Results are tabulated as J(b/a, q̂) in the form <code>Pb = k(ab)<sup>1−m</sup>(Et²)<sup>m</sup>e<sup>J</sup></code> and match Figs. A1.1–A1.14</li>
+  <li><b>Three sides and laminated four sides:</b> taken directly from the E1300 charts (Figs. A1.15–A1.26, A1.29–A1.42); every contour was digitised and checked against the original charts. Values between contours are interpolated on a log scale; points beyond the contours are extended with NFL ∝ 1/L² and flagged</li>
+  <li><b>Two sides:</b> Fig. A1.27 (monolithic) <code>NFL = 21,600·t²/L²</code> and Fig. A1.43 (laminated) with a constant per thickness (L = unsupported edge length, mm)</li>
+  <li><b>Laminated:</b> PVB 0.76 mm, two equal plies, named by E1300 designation (e.g. 4+4 = 8 mm)</li>
+ </ul>
+ <h3>Deflection</h3>
+ <p>Four and three sides: same nonlinear plate model (maximum over the lite, minimum thickness); laminated four sides: two-ply model with PVB G = 0.44 MPa; laminated three and two sides: effective thickness h<sub>ef,w</sub> (E1300 X9); two sides: simple beam <code>δ = 5qL⁴/(32Et³)</code>. E1300 gives no deflection limit; the program uses b/240 as set. Laminated deflections are approximate</p>
+ <h3>Glass fin</h3>
+ <p><code>r = √( k·w·h²·q / (t·σ<sub>a</sub>) )</code>, k = 3/4 one-side fin, 3/8 two-side fin, t = minimum thickness, σ<sub>a</sub> = ${cfg.rib.AN} / ${cfg.rib.HS} / ${cfg.rib.FT} MPa (AN / HS / FT), rounded up to whole mm.
+  16.2 MPa is the stress behind the two-sided chart (Fig. A1.27: 0.75 × 21,600 kPa), where the glass acts as a simple beam like a fin. Adjustable in Settings</p>
+ <h3>Limits</h3>
+ <ul><li>Insulating glass: four-sided support only (E1300 1.3), identical lites</li><li>Three sides: supported edge perpendicular to the free edge ≥ 0.5 × free edge</li><li>Two sides: charts cover 6–22 mm (laminated 6–19 mm)</li><li>Total load ≤ 15 kPa</li><li>Design aid only; final designs should be checked and signed off by an engineer</li></ul>
+ <h3>References</h3>
+ <ol class="refs">
+  <li>ASTM E1300-16, <i>Standard Practice for Determining Load Resistance of Glass in Buildings</i>, ASTM International — §6.2 (basic procedure), §6.3 (analytical procedure, four-sided support), Table 1 (GTF), Table 4 (minimum thickness), Annex A1 (NFL charts, Figs. A1.1–A1.44), Annex A2 (failure prediction model), Appendix X9 (laminated effective thickness)</li>
+  <li>ASTM E1300-04, Table 2 (GTF for insulating glass, short duration) and Appendix X3 (load share factors)</li>
+  <li>Beason, W.L. and Morgan, J.R. (1984), "Glass Failure Prediction Model", <i>Journal of Structural Engineering</i>, ASCE, 110(2), 197–212 — m = 7, k = 2.86×10⁻⁵³ N⁻⁷m¹²</li>
+  <li>Facade Tectonics Institute, "The Glass Failure Prediction Model" — biaxial factor and load-duration effect</li>
+  <li>Glass fin: simple beam under wind load from the face glass (as in GL300), allowable stress from the E1300 two-sided chart, Fig. A1.27</li>
+ </ol>
+ <p class="note">Not yet checked against ASTM E1300-24 (current edition); the document was not available.</p>` : `
+ <h3>หลักการ (ASTM E1300)</h3>
+ <p><code>LR = NFL × GTF × LS</code> ผ่านเมื่อ <code>LR ≥ q</code> (q = แรงลมออกแบบ 3 วินาที)</p>
+ <ul>
+  <li><b>NFL</b> (non-factored load) แรงที่ทำให้กระจก annealed แตก 8 ใน 1,000 แผ่น (Pb = 0.008) ใช้ความหนาต่ำสุดตาม Table 4</li>
+  <li><b>GTF</b> ลม 3 วินาที: กระจกชั้นเดียว/laminated AN 1.0, HS 2.0, FT 4.0 (Table 1); Insulated ชนิดเดียวกันทั้ง 2 แผ่น AN 0.9, HS 1.8, FT 3.6 (Table 2)</li>
+  <li><b>LS</b> Insulated 2 แผ่นหนาเท่ากัน = (t₁³+t₂³)/t₁³ = 2 แต่ละแผ่นรับแรง q/2</li>
+ </ul>
+ <h3>ที่มาของ NFL</h3>
+ <ul>
+  <li><b>ยึด 4 ด้าน (monolithic):</b> วิธีวิเคราะห์ของ E1300 (6.3) คือแผ่นยึดแบบ simple support ขอบเลื่อนในระนาบได้ วิเคราะห์ nonlinear (von Kármán) แล้วใช้ failure prediction model:
+   <code>B = k (t<sub>d</sub>/60)<sup>m/16</sup> ∫(c·σ<sub>max</sub>)<sup>m</sup> dA</code>, <code>Pb = 1 − e<sup>−B</sup></code>, m = 7, k = 2.86×10⁻⁵³ N⁻⁷m¹², t<sub>d</sub> = 3 s, E = 71.7 GPa, ν = 0.22, c = ตัวคูณ biaxial (polynomial ของ σ<sub>min</sub>/σ<sub>max</sub>)
+   ผลจัดเป็นตาราง J(b/a, q̂) ตามรูปแบบ <code>Pb = k(ab)<sup>1−m</sup>(Et²)<sup>m</sup>e<sup>J</sup></code> และตรวจทับกราฟ Fig. A1.1–A1.14 แล้วตรงกัน</li>
+  <li><b>ยึด 3 ด้าน และ laminated 4 ด้าน:</b> ใช้กราฟของ E1300 โดยตรง (Fig. A1.15–A1.26, A1.29–A1.42) อ่านเส้นทุกระดับจากกราฟด้วยโปรแกรมและตรวจทับกราฟต้นฉบับแล้ว ค่าระหว่างเส้นใช้ interpolate แบบ log; จุดที่อยู่นอกเส้นในกราฟจะต่อด้วย NFL ∝ 1/L² และแสดงคำเตือน</li>
+  <li><b>ยึด 2 ด้าน:</b> Fig. A1.27 (monolithic) <code>NFL = 21,600·t²/L²</code> และ Fig. A1.43 (laminated) ค่าคงที่ตามความหนา (L = ความยาวขอบที่ไม่ได้ยึด, mm)</li>
+  <li><b>Laminated:</b> PVB 0.76 mm, 2 แผ่นหนาเท่ากัน, ความหนาเรียกตาม designation ของ E1300 (เช่น 4+4 = 8 mm)</li>
+ </ul>
+ <h3>ระยะแอ่นตัว</h3>
+ <p>4 และ 3 ด้าน: โมเดลแผ่น nonlinear (ค่ามากสุดของแผ่น, ใช้ความหนาต่ำสุด); laminated 4 ด้าน: โมเดลแผ่น 2 ชั้น PVB G = 0.44 MPa; laminated 3 ด้าน และ 2 ด้าน: ใช้ effective thickness h<sub>ef,w</sub> (E1300 X9); 2 ด้าน: คานช่วงเดียว <code>δ = 5qL⁴/(32Et³)</code>. E1300 ไม่กำหนดเกณฑ์ระยะแอ่น โปรแกรมใช้ b/240 ตามที่ตั้งค่า ค่าระยะแอ่นของ laminated เป็นค่าประมาณ</p>
+ <h3>ครีบกระจก</h3>
+ <p><code>r = √( k·w·h²·q / (t·σ<sub>a</sub>) )</code> k = 3/4 ครีบด้านเดียว, 3/8 ครีบสองด้าน, t = ความหนาต่ำสุด, σ<sub>a</sub> = ${cfg.rib.AN} / ${cfg.rib.HS} / ${cfg.rib.FT} MPa (AN / HS / FT), ปัดขึ้นเป็นจำนวนเต็ม mm.
+  ค่า 16.2 MPa มาจากหน่วยแรงที่ใช้สร้างกราฟ 2 ด้าน (Fig. A1.27: 0.75 × 21,600 kPa) ซึ่งเป็นกรณีกระจกทำงานเป็นคานช่วงเดียวเหมือนครีบ ปรับค่าได้ในแท็บตั้งค่า</p>
+ <h3>ขอบเขต</h3>
+ <ul><li>Insulated เฉพาะยึด 4 ด้าน (E1300 1.3) และ lites ชนิด/ความหนาเดียวกัน</li><li>ยึด 3 ด้าน: ขอบที่ยึดตั้งฉากกับขอบอิสระต้องยาว ≥ 0.5 เท่าของขอบอิสระ</li><li>ยึด 2 ด้าน: กราฟครอบคลุม 6–22 mm (laminated 6–19 mm)</li><li>แรงลมรวมไม่เกิน 15 kPa</li><li>ผลเป็นเครื่องมือช่วยออกแบบ งานจริงควรให้วิศวกรตรวจรับรอง</li></ul>
+ <h3>เอกสารอ้างอิง</h3>
+ <ol class="refs">
+  <li>ASTM E1300-16, <i>Standard Practice for Determining Load Resistance of Glass in Buildings</i>, ASTM International — หัวข้อ 6.2 (วิธีพื้นฐาน), 6.3 (วิธีวิเคราะห์ ยึด 4 ด้าน), Table 1 (GTF), Table 4 (ความหนาต่ำสุด), Annex A1 (กราฟ NFL Fig. A1.1–A1.44), Annex A2 (failure prediction model), Appendix X9 (effective thickness laminated)</li>
+  <li>ASTM E1300-04, Table 2 (GTF กระจก Insulated, ลม 3 วินาที) และ Appendix X3 (load share factor)</li>
+  <li>Beason, W.L. และ Morgan, J.R. (1984), "Glass Failure Prediction Model", <i>Journal of Structural Engineering</i>, ASCE, 110(2), 197–212 — ค่า m = 7, k = 2.86×10⁻⁵³ N⁻⁷m¹²</li>
+  <li>Facade Tectonics Institute, "The Glass Failure Prediction Model" — ตัวคูณ biaxial และผลของระยะเวลาแรง</li>
+  <li>ครีบกระจก: สูตรคานช่วงเดียวรับแรงลมจากแผ่นหน้า (เหมือน GL300) ใช้หน่วยแรงที่ยอมให้จากกราฟยึด 2 ด้าน E1300 Fig. A1.27</li>
+ </ol>
+ <p class="note">ยังไม่ได้เทียบกับ ASTM E1300-24 (ฉบับปัจจุบัน) เพราะไม่มีตัวเอกสาร</p>`; }
+
+// ---------- Tabs ----------
+document.querySelectorAll('nav button').forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b===btn));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='tab-'+btn.dataset.tab));
+});
+
+// ---------- Save / Open ----------
+const FORM_IDS=['wl','a','b','lam','ins','sel','thkSel','defl','pProject','pLocation','pItem','pBy','pPos'];
+$('btnSave').onclick=()=>{
+  const d={app:'glass-calc-e1300',v:2,sup:document.querySelector('[name=sup]:checked').value,gl:document.querySelector('[name=gl]:checked').value};
+  FORM_IDS.forEach(id=>d[id]=$(id).type==='checkbox'?$(id).checked:$(id).value);
+  const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const aEl=document.createElement('a'); aEl.href=URL.createObjectURL(blob);
+  aEl.download=(($('pItem').value||'glass')+'.json').replace(/[\\/:*?"<>|]/g,'_'); aEl.click(); URL.revokeObjectURL(aEl.href);
+};
+$('btnOpen').onclick=()=>$('fileOpen').click();
+$('fileOpen').onchange=async e=>{
+  const file=e.target.files[0]; if(!file) return;
+  try{
+    const d=JSON.parse(await file.text());
+    FORM_IDS.forEach(id=>{ if(d[id]===undefined||id==='thkSel') return; if($(id).type==='checkbox') $(id).checked=d[id]; else $(id).value=d[id]; });
+    const s=document.querySelector(`[name=sup][value="${d.sup}"]`); if(s) s.checked=true;
+    const g=document.querySelector(`[name=gl][value="${d.gl}"]`); if(g) g.checked=true;
+    fillThk(); $('thkSel').value=d.thkSel; render();
+  }catch(err){ $('msgBox').innerHTML=`<p class="msg">${t('eOpen')}</p>`; }
+  e.target.value='';
+};
+
+// ---------- Print ----------
+$('btnPrint').onclick=()=>{
+  if(!last){ render(); if(!last) return; }
+  const {inp,out}=last, p=out.pick, sup=SUPS.find(s=>s.v===inp.sup);
+  const pass=p.okS&&(!inp.defl||p.okD);
+  const today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const tr=(k,v)=>`<tr><td>${k}</td><td>${v}</td></tr>`;
+  $('printSheet').innerHTML=`
+   <h2>Glass Load Resistance — ASTM E1300</h2>
+   <table><tbody>${tr('Project',$('pProject').value||'-')}${tr('Location',$('pLocation').value||'-')}${tr('Item No.',$('pItem').value||'-')}${tr('Date',today)}</tbody></table>
+   <h3>Design data</h3>
+   <table><tbody>
+    ${tr('Design wind load, q (3-second)',`${f2(inp.q)} kPa (${f2(inp.q/0.00981)} kg/m²)`)}
+    ${tr('Dimensions, a × b',`${inp.a} × ${inp.b} mm`)}
+    ${tr('Support condition',sup.en)}
+    ${tr('Glass',glassName(inp))}
+    ${tr('Nominal thickness',p.item.label+' mm (minimum '+f2(p.item.tmin)+' mm)')}
+   </tbody></table>
+   <div style="display:flex;gap:20px;align-items:flex-start">
+    <div style="width:58mm"><svg viewBox="0 0 360 400" style="width:55mm">${$('drawing').innerHTML}</svg>${sectionSVG(litesOf(p.item, inp.ins), p.item.label)}</div>
+    <div style="flex:1">
+     <h3>Result</h3>
+     <table><tbody>
+      ${tr('Non-factored load, NFL',`${f2(p.NFL)} kPa (${f2(p.NFL/0.00981)} kg/m²)`)}
+      ${tr('Glass type factor, GTF',p.GTF)}
+      ${inp.ins?tr('Load share factor, LS',p.LS):''}
+      ${tr('<b>Load resistance, LR</b>',`<b>${f2(p.LR)} kPa</b> (${f2(p.LR/0.00981)} kg/m²)`)}
+      ${tr('q / LR',f2(p.ratio)+(p.okS?'  OK':'  NOT OK'))}
+      ${tr('Maximum deflection'+(inp.ins?' (per lite)':''),`${f2(p.defl)} mm`+(inp.defl?` ${p.okD?'≤':'>'} ${defLabel()} = ${f2(p.dAllow)} mm`:''))}
+      ${tr('<b>Conclusion</b>',`<b>${pass?'PASS':'FAIL'}</b>`)}
+     </tbody></table>
+    </div>
+   </div>
+   <p style="font-size:8.5pt;margin-top:8px">LR = NFL × GTF × LS (ASTM E1300, 3-second load, Pb ≤ 0.008). NFL: ${
+     inp.sup==='4' && !inp.lam ? 'E1300 analytical procedure (nonlinear plate + failure prediction model, m = 7, k = 2.86E-53 N⁻⁷m¹², E = 71.7 GPa, ν = 0.22), checked against Figs. A1.1–A1.14'
+     : inp.sup==='4' ? 'E1300 Figs. A1.29–A1.35 (PVB laminated, four sides)'
+     : (inp.sup==='3a'||inp.sup==='3b') ? (inp.lam?'E1300 Figs. A1.36–A1.42 (PVB laminated, three sides)':'E1300 Figs. A1.15–A1.26 (three sides)')
+     : (inp.lam?'E1300 Fig. A1.43 (two sides, laminated)':'E1300 Fig. A1.27 (two sides)')}. Minimum thicknesses per E1300 Table 4.${gtfEdited()?' GTF values were modified from E1300 Tables 1–2 by the user.':''}${p.out?' Value outside E1300 chart range — verify separately.':''}</p>
+   <h3>References</h3>
+   <ol style="font-size:8.5pt;margin:2px 0 0 18px;padding:0">
+    <li>ASTM E1300-16, Standard Practice for Determining Load Resistance of Glass in Buildings — §6.2, §6.3, Tables 1 &amp; 4, Annex A1 (Figs. A1.1–A1.44), Annex A2, Appendix X9.</li>
+    <li>ASTM E1300-04, Table 2 (GTF, insulating glass) and Appendix X3 (load share).</li>
+    <li>Beason, W.L. &amp; Morgan, J.R. (1984), Glass Failure Prediction Model, J. Struct. Eng. ASCE 110(2), 197–212.</li>
+   </ol>
+   <table style="margin-top:16px"><tbody>${tr('Prepared by',($('pBy').value||'')+($('pPos').value?' — '+$('pPos').value:''))}${tr('Signature','')}</tbody></table>`;
+  window.print();
+};
+
+document.querySelectorAll('#tab-calc input, #tab-calc select').forEach(el=>{el.addEventListener('input',render);el.addEventListener('change',render);});
+document.querySelectorAll('#tab-rib input, #tab-rib select').forEach(el=>{el.addEventListener('input',renderRib);el.addEventListener('change',renderRib);});
+$('btnLang').onclick=()=>{ LANG = LANG==='th'?'en':'th'; try{ localStorage.setItem('glcalc.lang',LANG); }catch(e){} applyLang(); renderHelp(); render(); renderRib(); };
+if(!$('pBy').value) $('pBy').value=cfg.by; if(!$('pPos').value) $('pPos').value=cfg.pos;
+applyLang(); renderHelp(); showCfg(); render(); renderRib();
+</script>
+</body>
+</html>
