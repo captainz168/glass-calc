@@ -829,6 +829,12 @@ document.querySelectorAll('#tab-calc input, #tab-calc select').forEach(el=>{el.a
 document.querySelectorAll('#tab-rib input, #tab-rib select').forEach(el=>{el.addEventListener('input',renderRib);el.addEventListener('change',renderRib);});
 $('btnLang').onclick=()=>{ LANG = LANG==='th'?'en':'th'; try{ localStorage.setItem('glcalc.lang',LANG); }catch(e){} applyLang(); renderHelp(); render(); renderRib(); };
 if(!$('pBy').value) $('pBy').value=cfg.by; if(!$('pPos').value) $('pPos').value=cfg.pos;
+// รับขนาดแผ่นจากลิงก์ ?a=&b=&item= (จากเครื่องมือวัดพื้นที่กระจก)
+(()=>{ try{
+  const q=new URLSearchParams(location.search), a=+q.get('a'), b=+q.get('b'), item=q.get('item');
+  if(a>0 && b>0){ $('a').value=Math.round(Math.min(a,b)); $('b').value=Math.round(Math.max(a,b)); }
+  if(item) $('pItem').value=item.slice(0,80);
+}catch(e){} })();
 applyLang(); renderHelp(); showCfg(); render(); renderRib();
 </script>
 </body>
