@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>โปรแกรมคำนวณกระจก</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F7F9F9;--panel:#FFFFFF;--ink:#1E272B;--muted:#5E6B70;--line:#D5DDDF;--glass:#2F7D78;--glass-tint:#DCEFEC;--frame:#7E8A90}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#141A1C;--panel:#1C2427;--ink:#E6ECEE;--muted:#9AA7AC;--line:#2F3A3E;--glass:#5FB8B0;--glass-tint:#1F3836;--frame:#8E9AA0}}
+:root[data-theme="dark"]{--paper:#141A1C;--panel:#1C2427;--ink:#E6ECEE;--muted:#9AA7AC;--line:#2F3A3E;--glass:#5FB8B0;--glass-tint:#1F3836;--frame:#8E9AA0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans Thai",system-ui,sans-serif;line-height:1.55}
+main{max-width:880px;margin:0 auto;padding:40px 20px 56px}
+header{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+h1{font-size:1.8rem;margin:0;letter-spacing:-.01em}
+h1 span{color:var(--glass)}
+header p{margin:0;color:var(--muted);flex:1;min-width:240px}
+.lang{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:4px 12px;border-radius:4px;cursor:pointer}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:640px){.cards{grid-template-columns:1fr}}
+a.card{display:grid;grid-template-columns:64px 1fr;gap:16px;align-items:start;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px}
+a.card:hover{border-color:var(--glass)}
+a.card:focus-visible{outline:2px solid var(--glass);outline-offset:3px}
+a.card h2{margin:0 0 4px;font-size:1.15rem}
+a.card p{margin:0;color:var(--muted);font-size:.92rem}
+a.card .go{margin-top:12px;color:var(--glass);font-weight:600;font-size:.92rem}
+.tag{display:inline-block;font-size:.78rem;background:var(--glass-tint);color:var(--glass);padding:1px 8px;border-radius:3px;margin-bottom:8px}
+footer{margin-top:28px;color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<main>
+ <header>
+  <h1 data-th="คำนวณกระจก <span>GL</span>" data-en="Glass Calculator <span>GL</span>">คำนวณกระจก <span>GL</span></h1>
+  <p data-th="ความหนากระจกรับแรงลม และความกว้างครีบกระจก (Rib) เลือกวิธีคำนวณที่ต้องการ" data-en="Glass thickness under wind load and glass fin (rib) width. Choose a calculation method.">ความหนากระจกรับแรงลม และความกว้างครีบกระจก (Rib) เลือกวิธีคำนวณที่ต้องการ</p>
+  <button class="lang" id="lang" type="button">EN</button>
+ </header>
+ <div class="cards">
+  <a class="card" href="GL300_new.html">
+   <svg width="64" height="76" viewBox="0 0 64 76" aria-hidden="true"><rect x="8" y="8" width="48" height="60" fill="var(--glass-tint)" stroke="var(--glass)" stroke-width="1.5"/><rect x="5" y="4" width="54" height="4" fill="var(--frame)"/><rect x="5" y="68" width="54" height="4" fill="var(--frame)"/><rect x="4" y="5" width="4" height="66" fill="var(--frame)"/><rect x="56" y="5" width="4" height="66" fill="var(--frame)"/><line x1="16" y1="32" x2="30" y2="18" stroke="var(--glass)" stroke-opacity=".5" stroke-width="2"/></svg>
+   <div>
+    <span class="tag">ASTM E1300</span>
+    <h2 data-th="GL300 ใหม่ (E1300)" data-en="GL300 New (E1300)">GL300 ใหม่ (E1300)</h2>
+    <p data-th="LR = NFL × GTF × LS ตามมาตรฐาน ASTM E1300 ลม 3 วินาที ใช้กับงานใหม่และงานที่ต้องยื่นตามมาตรฐาน" data-en="LR = NFL × GTF × LS to ASTM E1300, 3-second load. For new projects and standard-compliant submissions.">LR = NFL × GTF × LS ตามมาตรฐาน ASTM E1300 ลม 3 วินาที ใช้กับงานใหม่และงานที่ต้องยื่นตามมาตรฐาน</p>
+    <div class="go" data-th="เปิดโปรแกรม" data-en="Open">เปิดโปรแกรม</div>
+   </div>
+  </a>
+  <a class="card" href="gl300-legacy.html">
+   <svg width="64" height="76" viewBox="0 0 64 76" aria-hidden="true"><rect x="8" y="8" width="48" height="60" fill="var(--glass-tint)" stroke="var(--glass)" stroke-width="1.5"/><rect x="4" y="5" width="4" height="66" fill="var(--frame)"/><rect x="56" y="5" width="4" height="66" fill="var(--frame)"/><line x1="8" y1="8" x2="56" y2="8" stroke="#B8322A" stroke-dasharray="4 3"/><line x1="8" y1="68" x2="56" y2="68" stroke="#B8322A" stroke-dasharray="4 3"/><text x="32" y="44" text-anchor="middle" font-size="12" font-weight="700" fill="var(--glass)">GL</text></svg>
+   <div>
+    <span class="tag">GL300 v2.0</span>
+    <h2 data-th="GL300 เดิม" data-en="GL300 Legacy">GL300 เดิม</h2>
+    <p data-th="สูตรและตารางเดียวกับโปรแกรม GL300 v2.0 (แก้ bug แล้ว) ใช้เทียบกับงานเก่าที่คำนวณด้วย GL300" data-en="Same formulas and tables as GL300 v2.0 (bug-fixed). For comparison with past GL300 calculations.">สูตรและตารางเดียวกับโปรแกรม GL300 v2.0 (แก้ bug แล้ว) ใช้เทียบกับงานเก่าที่คำนวณด้วย GL300</p>
+    <div class="go" data-th="เปิดโปรแกรม" data-en="Open">เปิดโปรแกรม</div>
+   </div>
+  </a>
+ </div>
+ <footer data-th="ผลเป็นเครื่องมือช่วยออกแบบ งานจริงควรให้วิศวกรตรวจรับรอง · Kama Joint Venture" data-en="Design aid only; final designs should be checked by an engineer · Kama Joint Venture">ผลเป็นเครื่องมือช่วยออกแบบ งานจริงควรให้วิศวกรตรวจรับรอง · Kama Joint Venture</footer>
+</main>
+<script>
+// ใช้ภาษาเดียวกับตัวโปรแกรม (เก็บใน localStorage key เดียวกัน)
+let lang='th'; try{ lang=localStorage.getItem('glcalc.lang')||'th'; }catch(e){}
+function apply(){
+  document.documentElement.lang=lang;
+  document.title = lang==='en' ? 'Glass Calculator' : 'โปรแกรมคำนวณกระจก';
+  document.querySelectorAll('[data-th]').forEach(el=>{ el.innerHTML = el.dataset[lang]; });
+  document.getElementById('lang').textContent = lang==='th' ? 'EN' : 'ไทย';
+}
+document.getElementById('lang').onclick=()=>{ lang = lang==='th'?'en':'th'; try{ localStorage.setItem('glcalc.lang',lang); }catch(e){} apply(); };
+apply();
+</script>
+</body>
+</html>
