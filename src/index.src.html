@@ -753,10 +753,17 @@ const FORM_IDS=['wl','a','b','lam','ins','sel','thkSel','defl','pProject','pLoca
 $('btnSave').onclick=()=>{
   const d={app:'glass-calc-e1300',v:2,sup:document.querySelector('[name=sup]:checked').value,gl:document.querySelector('[name=gl]:checked').value};
   FORM_IDS.forEach(id=>d[id]=$(id).type==='checkbox'?$(id).checked:$(id).value);
-  const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
-  const aEl=document.createElement('a'); aEl.href=URL.createObjectURL(blob);
-  aEl.download=(($('pItem').value||'glass')+'.json').replace(/[\\/:*?"<>|]/g,'_'); aEl.click(); URL.revokeObjectURL(aEl.href);
+  saveFile((($('pItem').value||'glass')+'.json').replace(/[\\/:*?"<>|]/g,'_'), JSON.stringify(d,null,2));
 };
+// บันทึกไฟล์: บนหน้า claude.ai ใช้ downloads capability, เปิดไฟล์ในเครื่องใช้ลิงก์ดาวน์โหลดปกติ
+async function saveFile(filename, text){
+  if (window.claude && typeof window.claude.use === 'function'){
+    const dl = await window.claude.use('downloads');
+    if (dl){ try{ await dl.save({filename, data:text}); }catch(e){} return; }
+  }
+  const aEl=document.createElement('a'); aEl.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));
+  aEl.download=filename; aEl.click(); setTimeout(()=>URL.revokeObjectURL(aEl.href),1000);
+}
 $('btnOpen').onclick=()=>$('fileOpen').click();
 $('fileOpen').onchange=async e=>{
   const file=e.target.files[0]; if(!file) return;
