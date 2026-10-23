@@ -707,6 +707,7 @@ function renderHelp(){ $('helpDoc').innerHTML = LANG==='en' ? `
   <li>Beason, W.L. and Morgan, J.R. (1984), "Glass Failure Prediction Model", <i>Journal of Structural Engineering</i>, ASCE, 110(2), 197–212 — m = 7, k = 2.86×10⁻⁵³ N⁻⁷m¹²</li>
   <li>Facade Tectonics Institute, "The Glass Failure Prediction Model" — biaxial factor and load-duration effect</li>
   <li>Glass fin: simple beam under wind load from the face glass (as in GL300), allowable stress from the E1300 two-sided chart, Fig. A1.27</li>
+  <li>GL300 version 2.00, Kim Yoo Seng Co., Ltd., (C) Copyright 1980–1997 — the original program this tool replaces; source of the screen layout, glass fin formula, drawings and calculation sheet format</li>
  </ol>
  <p class="note">Not yet checked against ASTM E1300-24 (current edition); the document was not available.</p>` : `
  <h3>หลักการ (ASTM E1300)</h3>
@@ -739,6 +740,7 @@ function renderHelp(){ $('helpDoc').innerHTML = LANG==='en' ? `
   <li>Beason, W.L. และ Morgan, J.R. (1984), "Glass Failure Prediction Model", <i>Journal of Structural Engineering</i>, ASCE, 110(2), 197–212 — ค่า m = 7, k = 2.86×10⁻⁵³ N⁻⁷m¹²</li>
   <li>Facade Tectonics Institute, "The Glass Failure Prediction Model" — ตัวคูณ biaxial และผลของระยะเวลาแรง</li>
   <li>ครีบกระจก: สูตรคานช่วงเดียวรับแรงลมจากแผ่นหน้า (เหมือน GL300) ใช้หน่วยแรงที่ยอมให้จากกราฟยึด 2 ด้าน E1300 Fig. A1.27</li>
+  <li>GL300 version 2.00, Kim Yoo Seng Co., Ltd., (C) Copyright 1980–1997 — โปรแกรมต้นฉบับที่เครื่องมือนี้ใช้แทน เป็นต้นแบบของหน้าจอ สูตรครีบกระจก รูปประกอบ และรูปแบบใบคำนวณ</li>
  </ol>
  <p class="note">ยังไม่ได้เทียบกับ ASTM E1300-24 (ฉบับปัจจุบัน) เพราะไม่มีตัวเอกสาร</p>`; }
 
@@ -820,6 +822,7 @@ $('btnPrint').onclick=()=>{
     <li>ASTM E1300-16, Standard Practice for Determining Load Resistance of Glass in Buildings — §6.2, §6.3, Tables 1 &amp; 4, Annex A1 (Figs. A1.1–A1.44), Annex A2, Appendix X9.</li>
     <li>ASTM E1300-04, Table 2 (GTF, insulating glass) and Appendix X3 (load share).</li>
     <li>Beason, W.L. &amp; Morgan, J.R. (1984), Glass Failure Prediction Model, J. Struct. Eng. ASCE 110(2), 197–212.</li>
+    <li>GL300 version 2.00, Kim Yoo Seng Co., Ltd., (C) 1980–1997 — original program; glass fin formula and sheet format.</li>
    </ol>
    <table style="margin-top:16px"><tbody>${tr('Prepared by',($('pBy').value||'')+($('pPos').value?' — '+$('pPos').value:''))}${tr('Signature','')}</tbody></table>`;
   window.print();

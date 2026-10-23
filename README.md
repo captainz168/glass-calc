@@ -31,6 +31,10 @@ pip install numpy
 python3 tools/build.py tools/data GL300_new.html
 ```
 
+## เครดิต
+โปรแกรมต้นฉบับ **GL300 version 2.00** พัฒนาโดย **Kim Yoo Seng Co., Ltd.** (C) Copyright 1980–1997
+`gl300-legacy.html` ใช้สูตร ตาราง และรูปแบบหน้าจอจาก GL300 ส่วน `GL300_new.html` ใช้หน้าจอ สูตรครีบ และรูปแบบใบคำนวณเป็นต้นแบบ เครดิตของงานต้นฉบับเป็นของผู้พัฒนาเดิม
+
 ## เอกสารอ้างอิง
 1. ASTM E1300-16, *Standard Practice for Determining Load Resistance of Glass in Buildings* — §6.2, §6.3, Tables 1 & 4, Annex A1, Annex A2, Appendix X9
 2. ASTM E1300-04, Table 2 (GTF insulating glass) และ Appendix X3 (load share)
